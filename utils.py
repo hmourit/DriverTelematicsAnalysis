@@ -1,7 +1,28 @@
 import json
 import cPickle as pickle
-# import cloud.serialization.cloudpickle as cp
+import const
+import random
+from os import listdir
 
+def radnom_k_trips_featurised(k, exception = None):
+    '''
+    Input:
+    k - # of trips
+    exception - optional - if needed trips from all drivers except this one
+    '''
+    trips = []
+    
+    for i in range(k):
+        files = listdir(const.FEATURISED_DATA_PATH)
+        random_file = random.choice(files)
+        
+        while random_file == exception:
+            random_file = random.choice(files)
+        
+        random_line = random.choice(list(open(const.FEATURISED_DATA_PATH + '/' + random_file)))  
+        trips.append(random_line)
+    
+    return trips
 
 def store_model_data(path, p):
     with open(path, 'a') as f:
