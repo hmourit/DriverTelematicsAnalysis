@@ -1,45 +1,49 @@
 import csv
 import numpy
+import cPickle as pickle
 from os import listdir
 from sklearn.metrics import roc_auc_score
-from sklearn.svm     import SVC
 from sklearn.cross_validation import KFold
-from sklearn.linear_model import LogisticRegression
+import sklearn.linear_model
+import sklearn.svm
+import sys
+import json
 
 import const
 import utils
 
 p = {
+    'classifier': sklearn.linear_model.LogisticRegression,
+    'classifier_args': {'C': 1000},
     'n_folds': 5,
     'n_negatives': 200,
-    'C': 10,
     'seed': 42
 }
 
-def process_element(elem):
-    if elem.lower() == "nan":
-        return 0.0
-    else:
-        return float(elem)
+
 
 if __name__ == "__main__":
-    validating = False
+    validating = True
 
     auc_score_avg = 0
     counter = 0
     
-    for file_name in listdir(const.FEATURIZED_DATA_PATH):
-        
-        
-        file_path = const.FEATURIZED_DATA_PATH + file_name 
-        file = open(file_path, 'r')
-        
+    pickled_file_path = const.FEATURIZED_DATA_PICKLED_PATH
+    
+    output_file = open((const.OUTPUT_PATH % (str(hash(str(p))))), 'w')
+    output_file.write("driver_trip,prob\n")
+    
+    with open(pickled_file_path, 'rb') as f:
+        files = pickle.load(f)
+    
+    print ("Begin... Hash: %s" % str(hash(str(p))))
+    
+    for file in files:                
         dataset = []
         for line in file:
-            dataset.append([1] + map(process_element, line.split(',')))
-        
-        for line in utils.random_k_trips_featurized(p['n_negatives']):
-            dataset.append([0] + map(process_element, line.split(',')))
+            dataset.append([1] + line)
+        for line in utils.random_k_trips_featurized_pickled(p['n_negatives'], files, exception=counter):
+            dataset.append([0] + line)
         
         dataset = numpy.array(dataset)
         numpy.random.shuffle(dataset)
@@ -49,12 +53,11 @@ if __name__ == "__main__":
         y = dataset[:,0]
         trips = dataset[:,1]
         
-        
         if validating: 
             for train, val in KFold(N_full, n_folds=p['n_folds']):
                 X_train, X_val, y_train, y_val = X[train], X[val], y[train], y[val]
                 
-                clf = LogisticRegression(C=p['C'])
+                clf = p['classifier'](**p['classifier_args'])
                 clf.fit(X_train, y_train)
                 
                 y_pred = clf.predict(X_val)
@@ -62,17 +65,22 @@ if __name__ == "__main__":
                 
                 auc_score_avg += roc_auc_score(y_real, y_pred) / (p['n_folds'] * const.N_DRIVERS)
         
-        output_file = open('a.csv', 'w')
-        output_file.write("driver_trip,prob\n")
-        clf = LogisticRegression(C=p['C'])
+        clf = p['classifier'](**p['classifier_args'])
         clf.fit(X, y)
         predictions = clf.predict(X)
-        for i in range(len(predictions)):
-            output_file.write(("%s_%s,%f\n" % (const.FEATURIZED_DATA_FILES[counter][:-4], trips[i], predictions[i])))
         
-        print ("%d/%d, id: %s" % (counter, const.N_DRIVERS, const.FEATURIZED_DATA_FILES[counter]))
+        for i in range(len(predictions)):
+            if int(y[i]) == 1:
+                output_file.write(("%s_%d,%f\n" % (const.FEATURIZED_DATA_FILES[counter][:-4], trips[i], predictions[i])))
+        
+        sys.stdout.write("%d/%d, id: %s\r" % (counter, const.N_DRIVERS, const.FEATURIZED_DATA_FILES[counter]))
+        sys.stdout.flush()
         counter += 1
         
+    print""
+    
     if validating:
         print auc_score_avg
-# ovo lijepse - sve u p
+    
+    output_file.close()
+    print "End"

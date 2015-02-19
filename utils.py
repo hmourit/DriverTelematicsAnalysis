@@ -12,7 +12,7 @@ def random_k_trips_featurized(k, exception=None):
     """
     Input:
     k - # of trips
-    exception - optional - if needed trips from all drivers except this one
+    exception - optional - if needed trips from all drivers except this one, name of the file
     """
     trips = []
     files = const.FEATURIZED_DATA_FILES
@@ -24,6 +24,24 @@ def random_k_trips_featurized(k, exception=None):
             random_file = random.choice(files)
 
         random_line = random.choice(list(open(const.FEATURIZED_DATA_PATH + '/' + random_file)))
+        trips.append(random_line)
+
+    return trips
+    
+def random_k_trips_featurized_pickled(k, files, exception=None):
+    """
+    Input:
+    k - # of trips
+    pickled_file_path - loaded data
+    exception - optional - if needed trips from all drivers except this one, index in list
+    """
+    trips = []      
+    for i in range(k):
+        random_file_idx = random.choice(range(len(files)))
+        while random_file_idx == exception:
+            random_file_idx = random.choice(range(len(files)))
+
+        random_line = random.choice(files[random_file_idx])
         trips.append(random_line)
 
     return trips
