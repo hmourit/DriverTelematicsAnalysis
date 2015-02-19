@@ -15,9 +15,9 @@ def random_k_trips_featurized(k, exception=None):
     exception - optional - if needed trips from all drivers except this one
     """
     trips = []
-
+    files = const.FEATURIZED_DATA_FILES
+    
     for i in range(k):
-        files = listdir(const.FEATURIZED_DATA_PATH)
         random_file = random.choice(files)
 
         while random_file == exception:
