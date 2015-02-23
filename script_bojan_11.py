@@ -9,16 +9,18 @@ import sklearn.ensemble
 import sklearn.svm
 import sys
 import json
+import sklearn.ensemble
 
 import const
 import utils
 
 p = {
-    'classifier': sklearn.ensemble.AdaBoostClassifier,
-    'classifier_args': {'n_estimators': 100},
-    'n_folds': 5,
+    'classifier': sklearn.ensemble.BaggingClassifier,
+    'classifier_args': {'base_estimator': sklearn.linear_model.LogisticRegression(C=10000), 'max_samples':0.5, 'n_estimators':50, 'bootstrap': False},
     'n_negatives': 200,
-    'seed': 42
+    'seed': 42,
+    'pickled_file_path': const.FEATURIZED_DATA_2_PICKLED_PATH,
+    'exclude_features': [0, 1] + range(60, 82) + [16, 17, 18, 27, 28, 29, 2, 3, 5, 6, 7, 38, 39, 40, 49, 50, 51, 60, 61, 62, 71, 72, 73]
 }
 
 
@@ -29,7 +31,7 @@ if __name__ == "__main__":
     auc_score_avg = 0
     counter = 0
     
-    pickled_file_path = const.FEATURIZED_DATA_PICKLED_PATH
+    pickled_file_path = p['pickled_file_path']
     
     output_file = open((const.OUTPUT_PATH % (str(hash(str(p))))), 'w')
     output_file.write("driver_trip,prob\n")
@@ -53,31 +55,33 @@ if __name__ == "__main__":
         numpy.random.shuffle(dataset)
         
         N_full = len(dataset)
-        X = dataset[:,2:]
+        
+        mask = numpy.ones(len(dataset[-1]), dtype=bool)
+        mask[p['exclude_features']] = False
+        X = dataset[:,mask]
         y = dataset[:,0]
         trips = dataset[:,1]
         
         clf = p['classifier'](**p['classifier_args'])
         clf.fit(X, y)
+        predictions = clf.predict_proba(X)[:, 1]
         
         if validating: 
-            y_pred = numpy.append(y_pred, clf.predict(X))
+            y_pred = numpy.append(y_pred, predictions)
             y_real = numpy.append(y_real, y)
-        
-        predictions = clf.predict(X)
         
         for i in range(len(predictions)):
             if int(y[i]) == 1:
                 output_file.write(("%s_%d,%f\n" % (const.FEATURIZED_DATA_FILES[counter][:-4], trips[i], predictions[i])))
         
-        sys.stdout.write("%d/%d, id: %s\r" % (counter, const.N_DRIVERS, const.FEATURIZED_DATA_FILES[counter]))
+        sys.stdout.write("%d/%d, id: %s, Cumulative validation: %f\r" % (counter, const.N_DRIVERS, const.FEATURIZED_DATA_FILES[counter], roc_auc_score(y_real, y_pred)))
         sys.stdout.flush()
         counter += 1
         
     print""
     
     if validating:
-        print roc_auc_score(y_real, y_pred)
+        print "Validation: ",roc_auc_score(y_real, y_pred)
     
     output_file.close()
     print "End"

@@ -9,13 +9,16 @@ import sklearn.ensemble
 import sklearn.svm
 import sys
 import json
+import sklearn.ensemble
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import chi2_kernel
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
 
 import const
 import utils
 
 p = {
-    'classifier': sklearn.ensemble.AdaBoostClassifier,
-    'classifier_args': {'n_estimators': 100},
     'n_folds': 5,
     'n_negatives': 200,
     'seed': 42
@@ -42,42 +45,38 @@ if __name__ == "__main__":
     
     print ("Begin... Hash: %s" % str(hash(str(p))))
     
+    distr = numpy.zeros((200,))
+    
     for file in files:                
-        dataset = []
-        for line in file:
-            dataset.append([1] + line)
-        for line in utils.random_k_trips_featurized_pickled(p['n_negatives'], files, exception=counter):
-            dataset.append([0] + line)
+        trips = []
         
-        dataset = numpy.array(dataset)
-        numpy.random.shuffle(dataset)
+        dataset = preprocessing.scale(numpy.array(file)[:, 1:])
         
-        N_full = len(dataset)
-        X = dataset[:,2:]
-        y = dataset[:,0]
-        trips = dataset[:,1]
+        distances = euclidean_distances(dataset, dataset)
         
-        clf = p['classifier'](**p['classifier_args'])
-        clf.fit(X, y)
+        sum_distances = distances.sum(axis=1)
+        sum_distances.sort()
+        distr = distr + sum_distances / len(files)
+                
         
-        if validating: 
-            y_pred = numpy.append(y_pred, clf.predict(X))
-            y_real = numpy.append(y_real, y)
-        
-        predictions = clf.predict(X)
-        
+        '''
         for i in range(len(predictions)):
             if int(y[i]) == 1:
                 output_file.write(("%s_%d,%f\n" % (const.FEATURIZED_DATA_FILES[counter][:-4], trips[i], predictions[i])))
-        
+        '''
         sys.stdout.write("%d/%d, id: %s\r" % (counter, const.N_DRIVERS, const.FEATURIZED_DATA_FILES[counter]))
         sys.stdout.flush()
         counter += 1
         
-    print""
+    print ""
+    #print distr
+    plt.plot(distr)
+    plt.show()
     
+    '''
     if validating:
         print roc_auc_score(y_real, y_pred)
+    '''
     
     output_file.close()
     print "End"

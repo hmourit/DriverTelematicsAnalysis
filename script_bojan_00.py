@@ -33,6 +33,9 @@ if __name__ == "__main__":
     output_file = open((const.OUTPUT_PATH % (str(hash(str(p))))), 'w')
     output_file.write("driver_trip,prob\n")
     
+    y_pred = numpy.array([])
+    y_real = numpy.array([])
+    
     with open(pickled_file_path, 'rb') as f:
         files = pickle.load(f)
     
@@ -53,20 +56,13 @@ if __name__ == "__main__":
         y = dataset[:,0]
         trips = dataset[:,1]
         
-        if validating: 
-            for train, val in KFold(N_full, n_folds=p['n_folds']):
-                X_train, X_val, y_train, y_val = X[train], X[val], y[train], y[val]
-                
-                clf = p['classifier'](**p['classifier_args'])
-                clf.fit(X_train, y_train)
-                
-                y_pred = clf.predict(X_val)
-                y_real = y_val
-                
-                auc_score_avg += roc_auc_score(y_real, y_pred) / (p['n_folds'] * const.N_DRIVERS)
-        
         clf = p['classifier'](**p['classifier_args'])
         clf.fit(X, y)
+        
+        if validating: 
+            y_pred = numpy.append(y_pred, clf.predict(X))
+            y_real = numpy.append(y_real, y)
+        
         predictions = clf.predict(X)
         
         for i in range(len(predictions)):
@@ -80,7 +76,7 @@ if __name__ == "__main__":
     print""
     
     if validating:
-        print auc_score_avg
+        print roc_auc_score(y_real, y_pred)
     
     output_file.close()
     print "End"

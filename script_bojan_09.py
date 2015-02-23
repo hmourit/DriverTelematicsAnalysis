@@ -9,16 +9,17 @@ import sklearn.ensemble
 import sklearn.svm
 import sys
 import json
+import sklearn.ensemble
 
 import const
 import utils
 
 p = {
-    'classifier': sklearn.ensemble.AdaBoostClassifier,
-    'classifier_args': {'n_estimators': 100},
-    'n_folds': 5,
+    'classifier': sklearn.ensemble.BaggingClassifier,
+    'classifier_args': {'base_estimator': sklearn.linear_model.LogisticRegression(C=20000), 'max_samples':0.5, 'n_estimators':100, 'bootstrap': False},
     'n_negatives': 200,
-    'seed': 42
+    'seed': 42,
+    'pickled_file_path': const.FEATURIZED_DATA_2_PICKLED_PATH
 }
 
 
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     auc_score_avg = 0
     counter = 0
     
-    pickled_file_path = const.FEATURIZED_DATA_PICKLED_PATH
+    pickled_file_path = p['pickled_file_path']
     
     output_file = open((const.OUTPUT_PATH % (str(hash(str(p))))), 'w')
     output_file.write("driver_trip,prob\n")
@@ -59,12 +60,11 @@ if __name__ == "__main__":
         
         clf = p['classifier'](**p['classifier_args'])
         clf.fit(X, y)
+        predictions = clf.predict_proba(X)[:, 1]
         
         if validating: 
-            y_pred = numpy.append(y_pred, clf.predict(X))
-            y_real = numpy.append(y_real, y)
-        
-        predictions = clf.predict(X)
+            y_pred = numpy.append(y_pred, predictions)
+            y_real = numpy.append(y_real, y)        
         
         for i in range(len(predictions)):
             if int(y[i]) == 1:
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     print""
     
     if validating:
-        print roc_auc_score(y_real, y_pred)
+        print "Validation: ",roc_auc_score(y_real, y_pred)
     
     output_file.close()
     print "End"

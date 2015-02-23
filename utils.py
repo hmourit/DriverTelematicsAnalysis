@@ -45,8 +45,7 @@ def random_k_trips_featurized_pickled(k, files, exception=None):
         trips.append(random_line)
 
     return trips
-
-
+    
 def store_model_data(path, p):
     with open(path, 'a') as f:
         params_json = json.dumps(p)

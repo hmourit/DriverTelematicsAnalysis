@@ -9,13 +9,14 @@ import sklearn.ensemble
 import sklearn.svm
 import sys
 import json
+import sklearn.ensemble
 
 import const
 import utils
 
 p = {
-    'classifier': sklearn.ensemble.AdaBoostClassifier,
-    'classifier_args': {'n_estimators': 100},
+    'classifier': sklearn.ensemble.BaggingClassifier,
+    'classifier_args': {'base_estimator': sklearn.linear_model.LogisticRegression(C=1000), 'max_samples':0.5, 'n_estimators':10, 'bootstrap': False},
     'n_folds': 5,
     'n_negatives': 200,
     'seed': 42
@@ -59,12 +60,13 @@ if __name__ == "__main__":
         
         clf = p['classifier'](**p['classifier_args'])
         clf.fit(X, y)
+        predictions = clf.predict_proba(X)[:, 1]
         
         if validating: 
-            y_pred = numpy.append(y_pred, clf.predict(X))
+            y_pred = numpy.append(y_pred, predictions)
             y_real = numpy.append(y_real, y)
         
-        predictions = clf.predict(X)
+        
         
         for i in range(len(predictions)):
             if int(y[i]) == 1:
