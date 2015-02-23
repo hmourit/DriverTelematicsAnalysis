@@ -6,11 +6,15 @@ random.seed(42)
 ORIGINAL_DATA_PATH = '../Data/drivers/'
 FEATURIZED_DATA_PATH = '../Competition3Shared/featurized_drivers/'
 FEATURIZED_DATA_2_PATH = '../Competition3Shared/featurized_drivers_2/'
+FEATURIZED_DATA_3_FOLDER = '../Competition3Shared/featurized_drivers_3/'
 FEATURIZED_DATA_PICKLED_PATH = '../Competition3Shared/featurized_drivers.pickle'
 FEATURIZED_DATA_2_PICKLED_PATH = '../Competition3Shared/featurized_drivers_2.pickle'
 PICKLED_MODEL_PATH = '../Competition3Shared/models/model_%s.pickle'
 OUTPUT_PATH = '../Competition3Shared/predictions/predictions_%s.txt'
 MODEL_DATA_FILE = '../Competition3Shared/model_data.csv'
+
+SINGLE_FILE = 'all.csv'
+INDIVIDUAL_FILE = '%d.csv'
 
 
 FEATURIZED_DATA_FILES = listdir(FEATURIZED_DATA_PATH)
