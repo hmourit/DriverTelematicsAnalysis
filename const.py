@@ -1,5 +1,6 @@
 import random
 from os import listdir
+from os.path import join, isdir
 random.seed(42)
 
 # Paths
@@ -17,7 +18,8 @@ MODEL_DATA_FILE = '../Competition3Shared/model_data.csv'
 SINGLE_FILE = 'all.csv'
 INDIVIDUAL_FILE = '%d.csv'
 
-
+DRIVERS_SET = set([int(d[d.rfind('/') + 1:]) for d in listdir(ORIGINAL_DATA_PATH)
+               if not d.startswith('.') and isdir(join(ORIGINAL_DATA_PATH, d))])
 FEATURIZED_DATA_FILES = listdir(FEATURIZED_DATA_PATH)
 N_DRIVERS = len(FEATURIZED_DATA_FILES)
 
