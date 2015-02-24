@@ -1,11 +1,9 @@
 import json
 import cPickle as pickle
-# import cloud.serialization.cloudpickle as cp
+# import cloud.serialization.cloudpickle as pickle
 import os
 import const
-import const
 import random
-from os import listdir
 
 
 def random_k_trips_featurized(k, exception=None):
@@ -27,7 +25,8 @@ def random_k_trips_featurized(k, exception=None):
         trips.append(random_line)
 
     return trips
-    
+
+
 def random_k_trips_featurized_pickled(k, files, exception=None):
     """
     Input:
@@ -49,7 +48,7 @@ def random_k_trips_featurized_pickled(k, files, exception=None):
 
 def store_model_data(path, p):
     with open(path, 'a') as f:
-        params_json = json.dumps(p)
+        params_json = json.dumps(p, default=str)
         model_hash = str(hash(params_json))
         f.write('%s,%s\n' % (model_hash, params_json))
     return model_hash
