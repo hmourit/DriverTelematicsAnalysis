@@ -40,13 +40,15 @@ with open(const.FEATURIZED_DATA_2_PICKLED_PATH, 'wb') as f:
 
 # Pickling featurized dataset 2
 dataset = []
-for file_name in listdir(const.FEATURIZED_DATA_3_FOLDER):        
+for file_name in listdir(const.FEATURIZED_DATA_3_FOLDER):   
+    if file_name == "all.csv":
+        continue
     file_path = const.FEATURIZED_DATA_3_FOLDER + file_name
     with open(file_path, 'r') as file:
         dataset.append([])
         for line in file:
             string_elems = line.split(',')
-            dataset[-1].append([int(string_elems[0])] + map(process_element, string_elems[1:]))
+            dataset[-1].append([int(string_elems[1])] + map(process_element, string_elems[2:]))
 
 with open(const.FEATURIZED_DATA_3_PICKLED_PATH, 'wb') as f:
     pickle.dump(dataset, f)
