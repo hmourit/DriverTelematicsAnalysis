@@ -14,6 +14,7 @@ FEATURIZED_DATA_3_PICKLED_PATH = '../Competition3Shared/featurized_drivers_3.pic
 PICKLED_MODEL_PATH = '../Competition3Shared/models/model_%s.pickle'
 OUTPUT_PATH = '../Competition3Shared/predictions/predictions_%s.txt'
 MODEL_DATA_FILE = '../Competition3Shared/model_data.csv'
+FIGURE_DATA_FILE = '../Competition3Shared/figures/%s'
 
 SINGLE_FILE = 'all.csv'
 INDIVIDUAL_FILE = '%d.csv'

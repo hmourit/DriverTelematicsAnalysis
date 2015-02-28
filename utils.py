@@ -4,7 +4,9 @@ import cPickle as pickle
 import os
 import const
 import random
-
+import math
+import matplotlib.pyplot as plt
+import pandas as pd
 
 def random_k_trips_featurized(k, exception=None):
     """
@@ -70,3 +72,26 @@ def get_drivers_int():
 
 def get_drivers_str():
     return sorted(map(lambda s: s.replace('.csv', ''), os.listdir(const.FEATURIZED_DATA_PATH)))
+    
+def plot_trips_index_driver(driver_trips, output_image):
+    return plot_trips([(int(const.FEATURIZED_DATA_FILES[driver][:-4]), trip) for (driver, trip) in driver_trips], output_image)
+    
+def plot_trips(driver_trips, output_image):
+    n = int(math.ceil(math.sqrt(len(driver_trips))))
+    counter = 0
+    
+    
+    
+    for (driver, trip) in driver_trips:
+        col = counter % n
+        row = int(counter / n)
+        
+        t = pd.read_csv(const.ORIGINAL_DATA_PATH + ("%d/%d.csv" % (driver, trip)))
+        
+        plt.subplot(n, n, counter+1)
+        plt.plot(t['x'], t['y'])
+        plt.title(("%d/%d" % (driver, trip)))
+        
+        counter += 1
+    
+    plt.savefig((const.FIGURE_DATA_FILE % (output_image)))
