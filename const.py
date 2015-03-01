@@ -5,6 +5,7 @@ random.seed(42)
 
 # Paths
 ORIGINAL_DATA_PATH = '../Data/drivers/'
+ORIGINAL_DATA_PICKLED_PATH = '../Competition3Shared/orig_data.pickle'
 FEATURIZED_DATA_PATH = '../Competition3Shared/featurized_drivers/'
 FEATURIZED_DATA_2_PATH = '../Competition3Shared/featurized_drivers_2/'
 FEATURIZED_DATA_3_FOLDER = '../Competition3Shared/featurized_drivers_3/'
