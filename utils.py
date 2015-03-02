@@ -80,9 +80,10 @@ def plot_trips(driver_trips, output_image):
     n = int(math.ceil(math.sqrt(len(driver_trips))))
     counter = 0
     
-    
-    
+    plt.figure()
+    print "\n\n"
     for (driver, trip) in driver_trips:
+        print (driver, trip)
         col = counter % n
         row = int(counter / n)
         
@@ -90,8 +91,9 @@ def plot_trips(driver_trips, output_image):
         
         plt.subplot(n, n, counter+1)
         plt.plot(t['x'], t['y'])
-        plt.title(("%d/%d" % (driver, trip)))
+        plt.title(("Driver %d trip %d" % (driver, trip)))
         
         counter += 1
+    
     
     plt.savefig((const.FIGURE_DATA_FILE % (output_image)))
