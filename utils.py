@@ -8,6 +8,7 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def random_k_trips_featurized(k, exception=None):
     """
     Input:
@@ -16,7 +17,7 @@ def random_k_trips_featurized(k, exception=None):
     """
     trips = []
     files = const.FEATURIZED_DATA_FILES
-    
+
     for i in range(k):
         random_file = random.choice(files)
 
@@ -36,7 +37,7 @@ def random_k_trips_featurized_pickled(k, files, exception=None):
     pickled_file_path - loaded data
     exception - optional - if needed trips from all drivers except this one, index in list
     """
-    trips = []      
+    trips = []
     for i in range(k):
         random_file_idx = random.choice(range(len(files)))
         while random_file_idx == exception:
@@ -67,33 +68,35 @@ def unpickle_model(path, model_hash):
 
 
 def get_drivers_int():
-    return sorted(map(lambda s: int(s.replace('.csv', '')), os.listdir(const.FEATURIZED_DATA_PATH)))
+    return sorted(int(s.rstrip('.csv') for s in os.listdir(const.FEATURIZED_DATA_PATH)))
 
 
 def get_drivers_str():
-    return sorted(map(lambda s: s.replace('.csv', ''), os.listdir(const.FEATURIZED_DATA_PATH)))
-    
+    return sorted(s.rstrip('.csv') for s in os.listdir(const.FEATURIZED_DATA_PATH))
+
+
 def plot_trips_index_driver(driver_trips, output_image):
-    return plot_trips([(int(const.FEATURIZED_DATA_FILES[driver][:-4]), trip) for (driver, trip) in driver_trips], output_image)
-    
+    return plot_trips([(int(const.FEATURIZED_DATA_FILES[driver][:-4]), trip) for (driver, trip) in driver_trips],
+                      output_image)
+
+
 def plot_trips(driver_trips, output_image):
     n = int(math.ceil(math.sqrt(len(driver_trips))))
     counter = 0
-    
+
     plt.figure()
     print "\n\n"
     for (driver, trip) in driver_trips:
         print (driver, trip)
         col = counter % n
         row = int(counter / n)
-        
+
         t = pd.read_csv(const.ORIGINAL_DATA_PATH + ("%d/%d.csv" % (driver, trip)))
-        
-        plt.subplot(n, n, counter+1)
+
+        plt.subplot(n, n, counter + 1)
         plt.plot(t['x'], t['y'])
         plt.title(("Driver %d trip %d" % (driver, trip)))
-        
+
         counter += 1
-    
-    
-    plt.savefig((const.FIGURE_DATA_FILE % (output_image)))
+
+    plt.savefig((const.FIGURE_DATA_FILE % output_image))
